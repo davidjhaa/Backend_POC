@@ -21,8 +21,10 @@ let users = [
 ];
 
 const userRouter = express.Router();
+const authRouter = express.Router();
    // base route   route to use
 app.use('/user', userRouter);
+app.use('/auth', authRouter);
 
 userRouter
     .route('/')
@@ -35,23 +37,11 @@ userRouter
     .route('/:id')
     .get(getuserById)
 
-// GET METHOD
-// app.get('/user')
 
-// POST METHOD
-// app.post('/user')
-
-// UPDATE METHOD ->patch
-// app.patch('/user')
-
-// DELETE METHOD
-// app.delete('/user')
-
-// parameters
-app.get('/user/:id', (req,res)=>{
-    console.log(req.params.id);
-    res.send("user id recieved");   
-})
+authRouter
+    .route('/signup')
+    .get(getSignup)
+    .post(postSignup)
 
 function getUser(req,res){
     res.send(users);
@@ -98,4 +88,17 @@ function getuserById(req,res){
         message : "req recieved",
         data : obj
     });
+}
+
+function getSignup(req, res){
+    res.sendFile(__dirname + '/signup/index.html');
+}
+
+function postSignup(req, res){
+    let obj = req.body;
+    console.log('backend ', obj);
+    res.json({
+        message : "user signed up",
+        data : obj
+    })
 }
