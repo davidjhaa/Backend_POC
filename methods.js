@@ -103,3 +103,51 @@ function postSignup(req, res){
         data : obj
     })
 }
+
+const db_link = 'mongodb+srv://davidjha732:7JhHM0AmQrPxMvhk@david007.x2tepdn.mongodb.net/?retryWrites=true&w=majority';
+
+mongoose.connect(db_link)
+.then(function(db){
+    // console.log(db);
+    console.log('db connected');
+})
+.catch(function(err){
+    console.log(err);
+})
+
+// schema
+const userSchema = mongoose.Schema({
+    name:{
+        type:String,
+        required:true,
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true
+    },
+    password:{
+        type:String,
+        required:true,
+        minLength:8
+    },
+    confirmPassword:{
+        type:String,
+        required:true,
+        minLength:8
+    }
+});
+
+// model
+const userModel = mongoose.model('userModal',userSchema);
+
+(async function createUser(){
+    let user = {
+        name:'jhaa',
+        email:'jhaa@gmail.com',
+        password:'12345678',
+        confirmPassword:'12345678'
+    };
+    let data = await userModel.create(user);
+    console.log(data);
+})();
