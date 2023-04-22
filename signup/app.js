@@ -45,11 +45,11 @@ authRouter
     .post(postSignup)
 
 async function getUsers(req,res){
-    // let allUsers = await userModel.find();
-    let user = await userModel.findOne({name:'Bhawani jha'})
+    let allUsers = await userModel.find();
+    // let user = await userModel.findOne({name:'Bhawani jha'})
     res.json({
         message : "list of all users",
-        data:user
+        data:allUsers
     });
 }
 
@@ -64,17 +64,19 @@ function postUser(req,res){
 
 async function updateUser(req,res){
     let dataToBeUpdated = req.body;
-    let user = await userModel.findOneAndUpdate({email:'vishal@gmail.com'},dataToBeUpdated);
+    let user = await userModel.findOneAndUpdate({email:'Dopa@gmail.com'},dataToBeUpdated);
     res.json({
         message : "data updated",
         data : user
     })
 };
 
-function deleteUser(req,res){
-    users={};
+async function deleteUser(req,res){
+    let dataToBeDeleted = req.body;
+    let user = await userModel.findOneAndDelete(dataToBeDeleted);
     res.json({
-        message : "data has been deleted"
+        message : "data has been deleted",
+        data : user
     })
 };
 
@@ -151,6 +153,17 @@ const userSchema = mongoose.Schema({
         required:true,
         minLength:8
     }
+});
+
+// pre post hooks
+// before save event occurs in db
+userSchema.pre('save',function(){
+    console.log("before saving to db", this)
+});
+
+// after save event occurs in db
+userSchema.post('save',function(doc){
+    console.log("after saving to db ", doc)
 });
 
 // model
