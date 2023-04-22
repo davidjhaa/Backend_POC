@@ -1,5 +1,8 @@
-const express = require('express');
 const mongoose = require('mongoose');
+const emailValidator = require('email-validator');
+const bcrypt = require('bcrypt');
+const userModel = require('./models/userModel');
+const express = require('express');
 const app = express();
 
 // middleware func->post, front->json
@@ -44,6 +47,18 @@ authRouter
     .get(getSignup)
     .post(postSignup)
 
+
+// CRUD OPERATION
+// CREATE
+async function postSignup(req, res){
+    let dataObj = req.body;
+    let user =await userModel.create(dataObj);
+    res.json({
+        message : "user signed up",
+        data : user
+    })
+}
+// READ
 async function getUsers(req,res){
     let allUsers = await userModel.find();
     // let user = await userModel.findOne({name:'Bhawani jha'})
@@ -52,16 +67,7 @@ async function getUsers(req,res){
         data:allUsers
     });
 }
-
-function postUser(req,res){
-    console.log(req.body);
-    users = req.body;
-    res.json({
-        message : "data recieved sucessfully",
-        user : req.body
-    })
-};
-
+// UPDATE
 async function updateUser(req,res){
     let dataToBeUpdated = req.body;
     let user = await userModel.findOneAndUpdate({email:'Dopa@gmail.com'},dataToBeUpdated);
@@ -70,13 +76,23 @@ async function updateUser(req,res){
         data : user
     })
 };
-
+// DELETE
 async function deleteUser(req,res){
     let dataToBeDeleted = req.body;
     let user = await userModel.findOneAndDelete(dataToBeDeleted);
     res.json({
         message : "data has been deleted",
         data : user
+    })
+};
+
+
+function postUser(req,res){
+    console.log(req.body);
+    users = req.body;
+    res.json({
+        message : "data recieved sucessfully",
+        user : req.body
     })
 };
 
@@ -111,71 +127,3 @@ function getSignup(req, res){
     // next();
     // res.sendFile(__dirname + '/signup/index.html');
 }
-
-async function postSignup(req, res){
-    let dataObj = req.body;
-    let user =await userModel.create(dataObj);
-    res.json({
-        message : "user signed up",
-        data : user
-    })
-}
-
-const db_link = "mongodb+srv://admin:cFTv92g1gaLcNn1s@cluster0.fzqnue5.mongodb.net/?retryWrites=true&w=majority";
-
-mongoose.connect(db_link)
-.then(function(db){
-    console.log('db connected');
-    // console.log(db);
-})
-.catch(function(err){
-    console.log(err);
-})
-
-// schema
-const userSchema = mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
-    },
-    email:{
-        type:String,
-        required:true,
-        unique:true
-    },
-    password:{
-        type:String,
-        required:true,
-        minLength:8
-    },
-    confirmPassword:{
-        type:String,
-        required:true,
-        minLength:8
-    }
-});
-
-// pre post hooks
-// before save event occurs in db
-userSchema.pre('save',function(){
-    console.log("before saving to db", this)
-});
-
-// after save event occurs in db
-userSchema.post('save',function(doc){
-    console.log("after saving to db ", doc)
-});
-
-// model
-const userModel = mongoose.model('userModel',userSchema);
-
-// (async function createUser(){
-//     let user = {
-//         name:'jha',
-//         email:'vishal@gmail.com',
-//         password:'12345678',
-//         confirmPassword:'12345678'
-//     };
-//     let data = await userModel.create(user);
-//     console.log(data);
-// })();
