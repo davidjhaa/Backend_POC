@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const emailValidator = require('email-validator');
 const bcrypt = require('bcrypt');
-
-const db_link = "mongodb+srv://admin:cFTv92g1gaLcNn1s@cluster0.fzqnue5.mongodb.net/?retryWrites=true&w=majority";
+const db_link = require('../secrets');
 
 mongoose.connect(db_link)
 .then(function(db){
@@ -39,7 +38,13 @@ const userSchema = mongoose.Schema({
         validate:function(){
             return this.password == this.confirmPassword;
         }
+    },
+    role:{
+        type : String,
+        enum : ['user','admin','owner','deliveryBoy'],
+        default : user
     }
+
 });
 
 // pre post hooks
@@ -53,11 +58,12 @@ const userSchema = mongoose.Schema({
 //     console.log("after saving to db ", doc)
 // });
 
+
 userSchema.pre('save',function(){
     this.confirmPassword=undefined; //THIS line will help to not save confirm password to db
 })
 
-// pre hooks 
+// below pre hooks is used for encrypting password before saving to db 
 // userSchema.pre('save',async function(){
 //     let salt = await bcrypt.genSalt();
 //     let hashedString = await bcrypt.hash(this.password, salt);
