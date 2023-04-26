@@ -1,15 +1,20 @@
 const userModel = require('../models/userModel');
 
-module.exports.getUsers=async function getUsers(req,res){
-    let allUsers = await userModel.find();
+module.exports.getUser=async function getUser(req,res){
+    let id = req.params.id;
+    let user = await userModel.findById(id);
     // let user = await userModel.findOne({name:'Bhawani jha'})
-    res.json({
-        message : "list of all users",
-        data:allUsers
-    });
+    if(user){
+        return res.json(user);
+    }
+    else{
+        return res.json({
+            message:'user not found'
+        });
+    }
 }
 
-module.exports.postUsers=function postUser(req,res){
+module.exports.postUser=function postUser(req,res){
     console.log(req.body);
     users = req.body;
     res.json({
@@ -18,33 +23,68 @@ module.exports.postUsers=function postUser(req,res){
     })
 };
 
-module.exports.updateUsers=async function updateUser(req,res){
-    let dataToBeUpdated = req.body;
-    let user = await userModel.findOneAndUpdate({email:'Dopa@gmail.com'},dataToBeUpdated);
-    res.json({
-        message : "data updated",
-        data : user
-    })
+module.exports.updateUser=async function updateUser(req,res){
+    try{
+        let id = req.params.id;
+        let dataToBeUpdated = req.body;
+        let user = await userModel.findById(id);
+        if(user){
+            const keys=[];
+            for(let key in dataToBeUpdated){
+                keys.push(key);
+            }
+            for(let i = 0; i < keys.length;i++){
+                user[keys[i]] = dataToBeUpdated[keys[i]];
+            }
+            const updatedData=await user.save();
+        
+            res.json({
+                message : "data updated",
+                data : user
+            })
+        }
+        else{
+            res.json({
+                message : "user not found"
+            })
+        }
+    }
+    catch(err){
+        res.json({
+            message : err.message,
+        });
+    }
 };
 
-module.exports.deleteUsers=async function deleteUser(req,res){
-    let dataToBeDeleted = req.body;
-    let user = await userModel.findOneAndDelete(dataToBeDeleted);
-    res.json({
-        message : "data has been deleted",
-        data : user
-    })
+module.exports.deleteUser=async function deleteUser(req,res){
+    try{
+        let id = req.params.id;
+        let user = await userModel.findByIdAndDelete(id);
+        if(!user){
+            res.json({
+                message:'user not found'
+            })
+        }
+        res.json({
+            message : "data has been deleted",
+            data : user
+        })
+    }
+    catch(err){
+        res.json({
+            message : err.message
+        })
+    }
 };
 
-module.exports.getuserById=function getuserById(req,res){
-    console.log(req.params.id);
-    let paramId = req.params.id;
-    let obj = {};
-    // for(let i = 0; i < users.length; i++){  //it is used for user array object defined earlier at top
-    //     if(users[i]['id'] == paramId){
-    //         obj = users[i];
-    //     }
-    // }
+module.exports.getAllUser=async function getAllUser(req,res){
+    let users = await userModel.find();  
+    if(users){
+        res.json({
+            message : "users recieved",
+            data : users
+        });
+    }  
     res.json({
         message : "req recieved",
         data : obj

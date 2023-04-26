@@ -43,6 +43,10 @@ const userSchema = mongoose.Schema({
         type : String,
         enum : ['user','admin','owner','deliveryBoy'],
         default : user
+    },
+    profileImage:{
+        type:String,
+        default:'img/users/default.jpeg'
     }
 
 });

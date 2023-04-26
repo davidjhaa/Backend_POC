@@ -5,24 +5,41 @@ const {postUser,updateUser,getUsers,getuserById,deleteUser} = require('../contro
 const userRouter = express.Router();
 
 
+// user's options
 userRouter
-    .route('/')
-    .get(protectRoute,getUsers)
-    .post(postUser)
+    .route('/:id')
     .patch(updateUser)
     .delete(deleteUser)
 
 userRouter
-    .route("/setCookies")
-    .get(setCookies);
+    .route('/signup')
+    .post(signup)
 
 userRouter
-    .route("/getCookies")
-    .get(getCookies);
+    .route('/login')
+    .post(login)
 
+// profile page
+app.use(protectRoute);
 userRouter
-    .route('/:id')
-    .get(getuserById)
+    .route('/userProfile')
+    .get(getUser)
+
+// admin specific function
+app.use(isAuthorised(['admin']));
+userRouter
+    .route('/')
+    .get(getAllUser)
+
+
+
+// userRouter
+//     .route("/setCookies")
+//     .get(setCookies);
+
+// userRouter
+//     .route("/getCookies")
+//     .get(getCookies);
 
 
 module.exports=userRouter;
