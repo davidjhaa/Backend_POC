@@ -1,7 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const protectRoute = require('./authHelper');
-const {postUser,updateUser,getUsers,getuserById,deleteUser} = require('../controller/userController');
+const {getUser,postUser,updateUser,deleteUser,getAllUser} = require('../controller/userController');
+const {signup,login,isAuthorised,protectRoute,forgetpassword,resetpassword,logout} = require('../controller/authController');
 const userRouter = express.Router();
 
 
@@ -20,17 +20,28 @@ userRouter
     .post(login)
 
 // profile page
-app.use(protectRoute);
+// userRouter.use(protectRoute);
 userRouter
     .route('/userProfile')
-    .get(getUser)
+    .get(protectRoute, getUser)
 
 // admin specific function
-app.use(isAuthorised(['admin']));
+// userRouter.use(isAuthorised(['admin']));
 userRouter
     .route('/')
-    .get(getAllUser)
+    .get(isAuthorised(['admin']), getAllUser)
 
+userRouter
+    .route('/forgetpassword')
+    .post(forgetpassword)
+
+userRouter
+    .route('/resetpassword')
+    .post(resetpassword)
+
+userRouter
+    .route('/logout')
+    .get(logout)
 
 
 // userRouter

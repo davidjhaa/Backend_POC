@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const emailValidator = require('email-validator');
 const bcrypt = require('bcrypt');
-const db_link = require('../secrets');
+const crypto = require('crypto');
+const { db_link } = require('../secrets');
 
 mongoose.connect(db_link)
 .then(function(db){
@@ -42,14 +43,28 @@ const userSchema = mongoose.Schema({
     role:{
         type : String,
         enum : ['user','admin','owner','deliveryBoy'],
-        default : user
+        default : 'user'
     },
     profileImage:{
         type:String,
         default:'img/users/default.jpeg'
-    }
-
+    },
+    resetToken : String
 });
+
+userSchema.methods.createResetToken = function(){
+    // creating unique token using crypto
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    this.resetToken = resetToken;
+    return resetToken;
+}
+
+userSchema.methods.resetPasswordHandler = function(password, confirmPassword){
+    this.password = password;
+    this.confirmPassword = confirmPassword;
+    this.resetToken = undefined;
+}
+
 
 // pre post hooks
 // before save event occurs in db
@@ -66,6 +81,7 @@ const userSchema = mongoose.Schema({
 userSchema.pre('save',function(){
     this.confirmPassword=undefined; //THIS line will help to not save confirm password to db
 })
+
 
 // below pre hooks is used for encrypting password before saving to db 
 // userSchema.pre('save',async function(){

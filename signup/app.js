@@ -10,9 +10,11 @@ app.listen(3000);
 
 const userRouter = require('./Routers/userRouter');
 const authRouter = require('./Routers/authRouter');
+const planRouter = require('./Routers/planRouter')
    // base route   route to use
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/plans', planRouter);
 
 
 // CRUD OPERATION

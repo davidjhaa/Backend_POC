@@ -2,6 +2,7 @@ const express = require('express');
 const userModel = require('../models/userModel');
 const authRouter = express.Router();
 const jwt = require('jsonwebtoken');
+const { JWT_KEY } = require('../secrets');
 
 // signup function
 module.exports.signup = async function signup(req, res){
@@ -32,12 +33,12 @@ module.exports.login = async function login(req,res){
     try{
         let data = req.body;
         if(data.email){
-            let user = await userModel.findOne({email:data.email});
+            let user = await userModel.findOne({ email : data.email });
             if(user){
                 // bcrypt has modified our password so plz decrypt before comparing
                 if(user.password == data.password){
                     let uid = user['_id'];
-                    let token = jwt.sign({})
+                    let token = jwt.sign({payload:uid},JWT_KEY);
                     res.cookie('isLoggedIn',true, {httpOnly:true});
                     return res.json({
                         message:"logged in successfully",
@@ -56,10 +57,15 @@ module.exports.login = async function login(req,res){
                 });
             }
         }
+        else{
+            return res.json({
+                message:"plz enter ur mail Id",
+            });
+        }
     } 
     catch(err){
         return res.json({
-            message:"catch error"
+            message:err.mesage,
         });
     } 
 }
@@ -67,7 +73,7 @@ module.exports.login = async function login(req,res){
 // isAuthorised -> to check roles
 module.exports.isAuthorised = function isAuthorised(roles){
     return function(req,res,next){
-        if(roles.include(req.role)==true)
+        if(roles.includes(req.role)==true)
             next();
         else{
             res.status(401).json({
@@ -78,10 +84,10 @@ module.exports.isAuthorised = function isAuthorised(roles){
 }
 
 // protect route
-function protectRoute(req,res,next){
+module.exports.protectRoute = async function protectRoute(req,res,next){
     try{
         if(req.cookies.isLoggedIn){
-            let isVerified = jwt.verify(req.cookies.isLoggedIn, JWT_KWEY);
+            let isVerified = jwt.verify(req.cookies.isLoggedIn, JWT_KEY);
             if(isVerified){
                 next();
             }
@@ -92,6 +98,10 @@ function protectRoute(req,res,next){
             }
         }
         else{
+            let client = req.get("User-Agent");
+            if(client.includes("mozilla") == true){
+                return res.redirect('/login');
+            }
             return res.json({
                 message:"Operation not allowed"
             });
@@ -103,3 +113,65 @@ function protectRoute(req,res,next){
         });
     }
 }
+
+//forgetPassword
+module.exports.forgetpassword = async function forgetpassword(req, res) {
+    let { email } = req.body;
+    try {
+      const user = await userModel.findOne({ email: email });
+      if (user) {
+        //createResetToken is used to create a new token
+        const resetToken = user.createResetToken();
+        // http://abc.com/resetpassword/resetToken
+        let resetPasswordLink = `${req.protocol}://${req.get("host")}/resetpassword/${resetToken}`;
+        //send email to the user
+        //nodemailer
+      } 
+      else {
+        return res.json({
+          mesage: "please signup",
+        });
+      }
+    } 
+    catch (err) {
+      res.status(500).json({
+        mesage: err.message,
+      });
+    }
+};
+
+// reset password
+module.exports.resetpassword = async function resetpassword(req, res) {
+    try {
+      const token = req.parmas.token;
+      let { password, confirmPassword } = req.body;
+      const user = await userModel.findOne({ resetToken: token });
+      if (user) {
+        //resetPasswordHandler will update user's password in db
+        user.resetPasswordHandler(password, confirmPassword);
+        await user.save();
+        res.json({
+          message: "password changed succesfully, please login again",
+        });
+      } 
+      else {
+        res.json({
+          message: "user not found",
+        });
+      }
+    } 
+    catch (err) {
+      res.json({
+        message: err.message,
+      });
+    }
+};
+
+module.exports.logout = function logout(req,res){
+    res.cookies('isLoggedIn', ' ', {maxAge:1});
+    res.json({
+        message : 'logged out Succesfully'
+    })
+}
+  
+  
