@@ -75,8 +75,9 @@ module.exports.login = async function login(req,res){
 // isAuthorised -> to check roles
 module.exports.isAuthorised = function isAuthorised(roles){
     return function(req,res,next){
-        if(roles.includes(req.role)==true)
+        if(roles.includes(req.role)==true){
             next();
+        }
         else{
             res.status(401).json({
                 message:'unauthorised access'
@@ -89,15 +90,15 @@ module.exports.isAuthorised = function isAuthorised(roles){
 module.exports.protectRoute = async function protectRoute(req,res,next){
     try{
         let token;
-        if(req.cookies.isLoggedIn){
-            token = req.cookies.isLoggedIn;
+        if(req.cookies.login){
+            token = req.cookies.login;
             let payload = jwt.verify(token, JWT_KEY);
             if(payload){
-                console.log("payload token", payload);
+                // console.log("payload token", payload);
                 const user = await userModel.findById(payload.payload);
-                // req.role = user.role;
-                req.id = user.id;
-                // console.log(req.role, req.id);
+                req.role = user.role;
+                // req.id = user.id;
+                console.log(req.role);
                 next();
             }
             else{
@@ -107,10 +108,10 @@ module.exports.protectRoute = async function protectRoute(req,res,next){
             }
         }
         else{
-            let client = req.get("User-Agent");
-            if(client.includes("mozilla") == true){
-                return res.redirect('/login');
-            }
+            // let client = req.get("User-Agent");
+            // if(client.includes("mozilla") == true){
+            //     return res.redirect('/login');
+            // }
             return res.json({
                 message:"Operation not allowed"
             });
@@ -186,7 +187,7 @@ module.exports.resetpassword = async function resetpassword(req, res) {
 };
 
 module.exports.logout = function logout(req,res){
-    res.cookies('login', ' ', {maxAge:1});
+    res.cookie('login', ' ', {maxAge:1});
     res.json({
         message : 'user logged out Succesfully'
     })

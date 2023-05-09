@@ -79,16 +79,19 @@ module.exports.deleteUser=async function deleteUser(req,res){
 
 module.exports.getAllUser=async function getAllUser(req,res){
     let users = await userModel.find();  
-    if(users){
+    try{
+        if(users){
+            res.json({
+                message : "users recieved",
+                data : users
+            });
+        }  
+    }
+    catch(err){
         res.json({
-            message : "users recieved",
-            data : users
-        });
-    }  
-    res.json({
-        message : "req recieved",
-        data : obj
-    });
+            message : err.message
+        })
+    }
 }
 
 module.exports.updateProfileImage=function updateProfileImage(req,res){

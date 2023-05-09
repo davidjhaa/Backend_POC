@@ -20,6 +20,19 @@ userRouter
     .route('/login')
     .post(login)
 
+    userRouter
+    .route('/forgetpassword')
+    .post(forgetpassword)
+
+userRouter
+    .route('/resetpassword')
+    .post(resetpassword)
+
+userRouter
+    .route('/logout')
+    .get(logout)
+
+
 
 //multer for fileupload
 
@@ -54,38 +67,19 @@ userRouter.post("/ProfileImage", upload.single('photo') ,updateProfileImage);
   });
 
 
+
 // profile page
-// userRouter.use(protectRoute);
+userRouter.use(protectRoute);
 userRouter
     .route('/userProfile')
-    .get(protectRoute, getUser)
+    .get(getUser)
+
 
 // admin specific function
-// userRouter.use(isAuthorised(['admin']));
+userRouter.use(isAuthorised(['admin']));
 userRouter
     .route('/')
-    .get(isAuthorised(['admin']), getAllUser)
-
-userRouter
-    .route('/forgetpassword')
-    .post(forgetpassword)
-
-userRouter
-    .route('/resetpassword')
-    .post(resetpassword)
-
-userRouter
-    .route('/logout')
-    .get(logout)
-
-
-// userRouter
-//     .route("/setCookies")
-//     .get(setCookies);
-
-// userRouter
-//     .route("/getCookies")
-//     .get(getCookies);
+    .get(getAllUser)
 
 
 module.exports=userRouter;
