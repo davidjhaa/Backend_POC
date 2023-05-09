@@ -13,21 +13,20 @@ planRouter
     .get(top3Plans)
 
 //own plan -> logged in necessary 
-// planRouter.use(protectRoute);
+planRouter.use(protectRoute);
 planRouter
     .route('/plan/:id')
     .get(getPlan);
-
-
-// admin nd restaurant owner can only create,update or delte plans 
-// planRouter.use(isAuthorised(['admin','restaurantowner']));
-planRouter
-    .route('/crudPlan')
-    .post(createPlan);
 
 planRouter
     .route('/crudPlan/:id')
     .patch(updatePlan)
     .delete(deletePlan)
+
+// admin nd restaurant owner can only create,update or delte plans 
+planRouter.use(isAuthorised(['admin','restaurantowner']));
+planRouter
+    .route('/crudPlan')
+    .post(createPlan);
 
 module.exports =  planRouter;

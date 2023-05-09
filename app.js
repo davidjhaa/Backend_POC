@@ -11,7 +11,7 @@ app.use(express.static('public/build'));
 
 
 app.use(express.json());
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 app.listen(port,function(){
    console.log(`server listening on port ${port}`); 
 });
